@@ -173,7 +173,6 @@ bind 成功时返回0，失败则返回-1并设置 errno。其中两种常见的
 + EACCES：被绑定的地址是受保护的地址，仅超级用户访问，比如将 socket 绑定到知名服务端口（1-1023）上时，bind 将返回此错误。
 + EADDRINUSE：被绑定的地址正在使用中。比如将 socket 绑定到一个处于 TIME_WAIT 状态的 socket 地址。
 
-
 ## 监听 socket
 
 ```cpp
@@ -242,5 +241,22 @@ int shutdown(int sockfd, int howto);
 | SHUT_RDWR | 同时关闭 sockfd 上的读和写。                                                                                                                                            |
 
 + shutdown 成功时返回0，失败则返回-1并设置 errno。
+
+## TCP 数据读写
+
+文件读写操作 read 和 write 同样适用于 socket。
+
+```cpp
+#include <unistd.h>
+ssize_t read(int fd, void *buf, size_t nbytes);
+ssize_t write(int fd, void *buf, size_t nbytes);
+```
+
++ fd 参数表示初始化的文件描述符。
++ buf 参数表示缓冲区位置指针。
++ nbytes 参数表示缓冲区大小。
++ read 和 write 成功时返回读写长度，失败时返回-1并设置 errno，读取到 EOF 时返回0。
+
+
 
 aa
