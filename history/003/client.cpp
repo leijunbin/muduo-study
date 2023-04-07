@@ -7,6 +7,8 @@
 
 #include "util.h"
 
+#define READ_BUFFER 1024
+
 int main() {
   // 创建网络套接字，返回文件描述符
   // 1:IP 地址类型,AF_INET表示IPV4,AF_INET6表示IPV6
@@ -33,7 +35,7 @@ int main() {
   errif(res == -1, "socket connect error.");
 
   while (true) {
-    char buf[1024];
+    char buf[READ_BUFFER];
     bzero(&buf, sizeof(buf));
     scanf("%s", buf);
     ssize_t write_bytes = write(sockfd, buf, sizeof(buf));

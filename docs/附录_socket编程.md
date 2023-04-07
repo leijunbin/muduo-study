@@ -154,7 +154,7 @@ int socket(int domain, int type, int protocol);
 ```
 
 + domain 参数告诉系统使用哪个底层协议族。支持 PF_INET、PF_INET6、PF_UNIX。
-+ type 参数指定服务类型。主要由面向连接的 SOCK_STREAM 服务（流服务）和面向数据报 SOCK_UGRAM（数据报）服务，分别对应 TCP 和 UDP 协议。
++ type 参数指定服务类型。主要由面向连接的 SOCK_STREAM 服务（流服务）和面向数据报 SOCK_UGRAM（数据报）服务，分别对应 TCP 和 UDP 协议。（补充：SOCK_NONBLOCK ——非阻塞 socket，SOCK_CLOEXEC —— fork 后不能够继承父进程的 socket）
 + protocol 参数是在前两个参数构成的协议集合下，在选择一个具体的协议，不过这个值通常是唯一的，所以一般设置为0，表示使用默认协议。
 + socket 系统调用成功返回一个 socket 文件描述符，失败则返回-1并设置 errno。
 
@@ -256,7 +256,5 @@ ssize_t write(int fd, void *buf, size_t nbytes);
 + buf 参数表示缓冲区位置指针。
 + nbytes 参数表示缓冲区大小。
 + read 和 write 成功时返回读写长度，失败时返回-1并设置 errno，读取到 EOF 时返回0。
-
-
 
 aa
