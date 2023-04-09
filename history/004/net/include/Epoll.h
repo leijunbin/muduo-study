@@ -7,8 +7,6 @@
 
 namespace TinyWeb {
 namespace net {
-class Channel;
-
 class Epoll {
  private:
   int epfd;
@@ -19,10 +17,9 @@ class Epoll {
   ~Epoll();
 
   void addFd(int fd, uint32_t op);
-  void updateChannel(Channel *);
-  std::vector<Channel *> poll(int timeout = -1);
+  std::vector<epoll_event> poll(int timeout = -1);
 };
 }  // namespace net
 }  // namespace TinyWeb
 
-#endif  // SRC_NET_INCLUDE_EPOLL_H_
+#endif

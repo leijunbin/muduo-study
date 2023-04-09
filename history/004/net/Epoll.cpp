@@ -4,8 +4,6 @@
 
 #include <cstring>
 
-#include "include/Channel.h"
-
 #define MAX_EVENTS 1000
 
 using namespace TinyWeb::net;
@@ -39,31 +37,13 @@ void Epoll::addFd(int fd, uint32_t op) {
   }
 }
 
-std::vector<Channel *> Epoll::poll(int timeout) {
-  std::vector<Channel *> activeChannels;
+std::vector<epoll_event> Epoll::poll(int timeout) {
+  std::vector<epoll_event> activeEvents;
   // 取出有数据发送的文件描述符
   int nfds = epoll_wait(epfd, events, MAX_EVENTS, timeout);
   // TODO: log
   for (int i = 0; i < nfds; ++i) {
-    Channel *ch = (Channel *)events[i].data.ptr;
-    ch->setRevents(events[i].events);
-    activeChannels.push_back(ch);
+    activeEvents.push_back(events[i]);
   }
-  return activeChannels;
-}
-
-void Epoll::updateChannel(Channel *channel) {
-  int fd = channel->fd();
-  struct epoll_event ev;
-  bzero(&ev, sizeof(ev));
-
-  ev.data.ptr = channel;
-  ev.events = channel->events();
-  if (!channel->inEpoll()) {
-    // TODO: log
-    epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev);
-    channel->setInEpoll();
-  } else {
-    epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &ev);
-  }
+  return activeEvents;
 }

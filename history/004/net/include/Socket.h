@@ -12,7 +12,7 @@ class Socket {
   ~Socket();
 
   int fd() const { return sockfd_; }
-  void bindAddress(InetAddress *const localaddr);
+  void bindAddress(const InetAddress &localaddr);
   void listen();
   int accept(InetAddress *peeraddr);
 

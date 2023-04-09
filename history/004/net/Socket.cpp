@@ -29,12 +29,12 @@ int Socket::createNoneblockingFD() {
   return sockfd;
 }
 
-void Socket::bindAddress(InetAddress *const localaddr) {
+void Socket::bindAddress(const InetAddress &localaddr) {
   // 将套接字与IP地址和端口号绑定
   // 1:套接字文件描述符
   // 2:套接字绑定地址和端口结构体的指针
   // 3:地址结构大小
-  if (0 != ::bind(sockfd_, (sockaddr *)localaddr->getSockAddr(),
+  if (0 != ::bind(sockfd_, (sockaddr *)localaddr.getSockAddr(),
                   sizeof(sockaddr_in))) {
     // TODO: log
   }
