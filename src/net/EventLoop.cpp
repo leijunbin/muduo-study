@@ -1,24 +1,143 @@
 #include "include/EventLoop.h"
 
-#include <vector>
+#include <sys/eventfd.h>
+#include <unistd.h>
+
+#include <cstring>
 
 #include "include/Channel.h"
-#include "include/Epoll.h"
+#include "include/Poller.h"
 
 using namespace TinyWeb::net;
 
-EventLoop::EventLoop() : ep_(nullptr), quit_(false) { ep_ = new Epoll(); }
+thread_local EventLoop *t_loopInThisThread = nullptr;
 
-EventLoop::~EventLoop() { delete ep_; }
+static int createEvent() {
+  int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+  if (evtfd < 0) {
+    // log
+  }
+  return evtfd;
+}
 
-void EventLoop::loop() {
-  while (!quit_) {
-    std::vector<Channel *> chs;
-    chs = ep_->poll();
-    for (auto it = chs.begin(); it != chs.end(); ++it) {
-      (*it)->handleEvent();
-    }
+unsigned long EventLoop::get_thread_id() {
+  unsigned long id;
+  memcpy(&id, &threadId_, 8);
+  return id;
+}
+
+EventLoop::EventLoop()
+    : looping_(false),
+      quit_(false),
+      callingPendingFunctors_(false),
+      threadId_(std::this_thread::get_id()),
+      poller_(Poller::newDefaultPoll(this)),
+      wakeupFd_(createEvent()),
+      wakeupChannel_(new Channel(this, wakeupFd_)) {
+  if (t_loopInThisThread) {
+    // log
+  } else {
+    t_loopInThisThread = this;
+  }
+
+  wakeupChannel_->setReadCallback(std::bind(&EventLoop::handleRead, this));
+  wakeupChannel_->enableReading();
+  // log
+}
+
+EventLoop::~EventLoop() {
+  wakeupChannel_->disableAll();
+  wakeupChannel_->remove();
+  ::close(wakeupFd_);
+  t_loopInThisThread = nullptr;
+}
+
+void EventLoop::handleRead() {
+  uint64_t one = 1;
+  ssize_t n = read(wakeupFd_, &one, sizeof(one));
+  if (n != sizeof(one)) {
+    // log
   }
 }
 
-void EventLoop::updateChannel(Channel *ch) { ep_->updateChannel(ch); }
+void EventLoop::loop() {
+  looping_.store(true);
+  quit_.store(false);
+
+  while (!quit_.load()) {
+    activeChannels_.clear();
+    poller_->poll(&activeChannels_);
+
+    for (Channel *channel : activeChannels_) {
+      channel->handleEvent();
+    }
+
+    doPendingFunctors();
+  }
+
+  looping_.store(false);
+}
+
+void EventLoop::quit() {
+  quit_.store(true);
+
+  if (!isInLoopThread()) {
+    wakeup();
+  }
+}
+
+void EventLoop::runInLoop(Functor cb) {
+  // int inThread = isInLoopThread();
+  // log
+  if (isInLoopThread()) {
+    cb();
+  } else {
+    queueInLoop(cb);
+  }
+}
+
+void EventLoop::queueInLoop(Functor cb) {
+  {
+    std::lock_guard<std::mutex> lg(mutex_);
+    pendingFunctors_.push_back(cb);
+  }
+
+  if (!isInLoopThread() || callingPendingFunctors_.load()) {
+    wakeup();
+  }
+}
+
+void EventLoop::wakeup() {
+  uint64_t one = 1;
+  ssize_t n = write(wakeupFd_, &one, sizeof(one));
+  if (n != sizeof(one)) {
+    // log
+  }
+}
+
+void EventLoop::updateChannel(Channel *channel) {
+  poller_->updateChannel(channel);
+}
+
+void EventLoop::removeChannel(Channel *channel) {
+  poller_->removeChannel(channel);
+}
+
+bool EventLoop::hasChannel(Channel *channel) {
+  return poller_->hasChannel(channel);
+}
+
+void EventLoop::doPendingFunctors() {
+  std::vector<Functor> functors;
+  callingPendingFunctors_.store(true);
+
+  {
+    std::lock_guard<std::mutex> lg(mutex_);
+    functors.swap(pendingFunctors_);
+  }
+
+  for (const Functor &functor : functors) {
+    functor();
+  }
+  callingPendingFunctors_.store(false);
+}

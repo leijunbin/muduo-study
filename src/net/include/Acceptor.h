@@ -10,18 +10,29 @@ class Socket;
 class InetAddress;
 class Channel;
 class Acceptor {
- private:
-  EventLoop *loop_;
-  Socket *sock_;
-  InetAddress *addr_;
-  Channel *acceptChannel_;
-  std::function<void(Socket *)> newConnectionCallback;
-
  public:
-  Acceptor(EventLoop *loop);
+  using NewConnectionCallback = std::function<void(int, const InetAddress &)>;
+
+  Acceptor(EventLoop *loop, const InetAddress &listenAddr,
+           bool reuseport = true);
   ~Acceptor();
-  void acceptConnection();
-  void setNewConnectionCallback(std::function<void(Socket *)>);
+
+  void setNewConnectionCallback(const NewConnectionCallback &cb) {
+    newConnectionCallback_ = cb;
+  }
+
+  void listen();
+
+  bool listenning() const { return listenning_; }
+
+ private:
+  void handleRead();
+
+  EventLoop *loop_;
+  Socket *acceptSock_;
+  Channel *acceptChannel_;
+  NewConnectionCallback newConnectionCallback_;
+  bool listenning_ = false;
 };
 }  // namespace net
 }  // namespace TinyWeb

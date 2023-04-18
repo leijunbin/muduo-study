@@ -4,6 +4,24 @@
 
 using namespace TinyWeb::net;
 
+sockaddr_in InetAddress::getLocalAddr(int sockfd) {
+  sockaddr_in localaddr{0};
+  socklen_t addrlen = sizeof(localaddr);
+  if (::getsockname(sockfd, (sockaddr*)&localaddr, &addrlen)) {
+    // log
+  }
+  return localaddr;
+}
+
+sockaddr_in InetAddress::getPeerAddr(int sockfd) {
+  sockaddr_in peeraddr{0};
+  socklen_t addrlen = sizeof(peeraddr);
+  if (::getpeername(sockfd, (sockaddr*)&peeraddr, &addrlen)) {
+    // log
+  }
+  return peeraddr;
+}
+
 InetAddress::InetAddress(uint16_t port, std::string ip) {
   // 初始化网络地址结构
   bzero(&addr_, sizeof(addr_));

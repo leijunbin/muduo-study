@@ -14,7 +14,7 @@ class Buffer {
  public:
   static const size_t kCheapPrepend = 8;
   static const size_t kInitialSize = 1024;
-  inline static const char tempCRLF[] = "\r\n";
+  // inline static const char tempCRLF[] = "\r\n";
 
   explicit Buffer(size_t initialSize = kInitialSize)
       : buffer_(kCheapPrepend + initialSize),
@@ -62,16 +62,16 @@ class Buffer {
   void append(const char *str) { append(str, strlen(str)); }
   void append(const std::string &str) { append(str.c_str(), str.size()); }
 
-  const char *findCRLF(const char *start = nullptr) const {
-    if (start != nullptr) {
-      assert(peek() <= start);
-      assert(start <= beginWrite());
-    } else {
-      start = peek();
-    }
-    const char *crlf = std::search(start, beginWrite(), tempCRLF, tempCRLF + 2);
-    return crlf == beginWrite() ? nullptr : crlf;
-  }
+  // const char *findCRLF(const char *start = nullptr) const {
+  //   if (start != nullptr) {
+  //     assert(peek() <= start);
+  //     assert(start <= beginWrite());
+  //   } else {
+  //     start = peek();
+  //   }
+  //   const char *crlf = std::search(start, beginWrite(), tempCRLF, tempCRLF +
+  //   2); return crlf == beginWrite() ? nullptr : crlf;
+  // }
 
   ssize_t readFd(int fd, int *saveErrno);
   ssize_t writeFd(int fd, int *saveErrno);

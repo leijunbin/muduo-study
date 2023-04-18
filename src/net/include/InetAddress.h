@@ -12,6 +12,7 @@ class InetAddress {
   InetAddress() = default;
 
   explicit InetAddress(uint16_t port, std::string ip = "0.0.0.0");
+  explicit InetAddress(const sockaddr_in &addr) : addr_(addr) {}
 
   std::string toIp() const;
   uint16_t toPort() const;
@@ -19,6 +20,9 @@ class InetAddress {
   const sockaddr_in *getSockAddr() const { return &addr_; }
 
   void setSockaddr(const sockaddr_in &addr) { addr_ = addr; }
+
+  static sockaddr_in getLocalAddr(int sockfd);
+  static sockaddr_in getPeerAddr(int sockfd);
 
  private:
   struct sockaddr_in addr_;

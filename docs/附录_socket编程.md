@@ -256,5 +256,3 @@ ssize_t write(int fd, void *buf, size_t nbytes);
 + buf 参数表示缓冲区位置指针。
 + nbytes 参数表示缓冲区大小。
 + read 和 write 成功时返回读写长度，失败时返回-1并设置 errno，读取到 EOF 时返回0。
-
-aa
