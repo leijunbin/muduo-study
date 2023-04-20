@@ -36,7 +36,6 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
     connectionCallback_ = cb;
   }
   void setMessageCallback(const MessageCallback &cb) { messageCallback_ = cb; }
-
   void setWriteCompleteCallback(const WriteCompleteCallback &cb) {
     writeCompleteCallback_ = cb;
   }
@@ -55,7 +54,7 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
 
   void setState(StateE state) { state_.store(state); }
 
-  void handleRead();
+  void handleRead(base::Timestamp receiveTime);
   void handleWrite();
   void handleClose();
   void handleError();

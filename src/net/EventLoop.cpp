@@ -7,10 +7,14 @@
 
 #include "include/Channel.h"
 #include "include/Poller.h"
+#include "include/TimerQueue.h"
 
 using namespace TinyWeb::net;
+using namespace TinyWeb::base;
 
 thread_local EventLoop *t_loopInThisThread = nullptr;
+
+const int kPollTimeMs = 10000;
 
 static int createEvent() {
   int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
@@ -33,7 +37,8 @@ EventLoop::EventLoop()
       threadId_(std::this_thread::get_id()),
       poller_(Poller::newDefaultPoll(this)),
       wakeupFd_(createEvent()),
-      wakeupChannel_(new Channel(this, wakeupFd_)) {
+      wakeupChannel_(new Channel(this, wakeupFd_)),
+      timerQueue_(new TimerQueue(this)) {
   if (t_loopInThisThread) {
     // log
   } else {
@@ -66,10 +71,10 @@ void EventLoop::loop() {
 
   while (!quit_.load()) {
     activeChannels_.clear();
-    poller_->poll(&activeChannels_);
+    pollReturnTime_ = poller_->poll(kPollTimeMs, &activeChannels_);
 
     for (Channel *channel : activeChannels_) {
-      channel->handleEvent();
+      channel->handleEvent(pollReturnTime_);
     }
 
     doPendingFunctors();
@@ -107,6 +112,22 @@ void EventLoop::queueInLoop(Functor cb) {
   }
 }
 
+TimerId EventLoop::runAt(Timestamp time, TimerCallback cb) {
+  return timerQueue_->addTimer(cb, time, 0.0);
+}
+
+TimerId EventLoop::runAfter(double delay, TimerCallback cb) {
+  Timestamp time(addTime(Timestamp::now(), delay));
+  return timerQueue_->addTimer(cb, time, 0.0);
+}
+
+TimerId EventLoop::runEvery(double interval, TimerCallback cb) {
+  Timestamp time(addTime(Timestamp::now(), interval));
+  return timerQueue_->addTimer(cb, time, interval);
+}
+
+void EventLoop::cancel(TimerId timerId) { timerQueue_->cancel(timerId); }
+
 void EventLoop::wakeup() {
   uint64_t one = 1;
   ssize_t n = write(wakeupFd_, &one, sizeof(one));
@@ -128,6 +149,8 @@ bool EventLoop::hasChannel(Channel *channel) {
 }
 
 void EventLoop::doPendingFunctors() {
+  // log
+
   std::vector<Functor> functors;
   callingPendingFunctors_.store(true);
 

@@ -1,5 +1,6 @@
 #include <functional>
 
+#include "../src/base/include/Timestamp.h"
 #include "../src/net/include/Buffer.h"
 #include "../src/net/include/Callbacks.h"
 #include "../src/net/include/EventLoop.h"
@@ -15,9 +16,9 @@ class EchoServer {
     server_.setConnectionCallback(
         std::bind(&EchoServer::onConnection, this, std::placeholders::_1));
 
-    server_.setMessageCallback(std::bind(&EchoServer::onMessage, this,
-                                         std::placeholders::_1,
-                                         std::placeholders::_2));
+    server_.setMessageCallback(
+        std::bind(&EchoServer::onMessage, this, std::placeholders::_1,
+                  std::placeholders::_2, std::placeholders::_3));
 
     // 设置合适的subloop线程数量
     server_.setThreadNum(3);
@@ -34,7 +35,8 @@ class EchoServer {
     }
   }
 
-  void onMessage(const TcpConnectionPtr &conn, Buffer *buf) {
+  void onMessage(const TcpConnectionPtr &conn, Buffer *buf,
+                 TinyWeb::base::Timestamp time) {
     std::string msg = buf->retrieveAsString(buf->readableBytes());
     conn->send(msg);
   }

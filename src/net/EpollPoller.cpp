@@ -23,10 +23,16 @@ EPollPoller::EPollPoller(EventLoop *loop)
 
 EPollPoller::~EPollPoller() { ::close(epollfd_); }
 
-void EPollPoller::poll(ChannelList *activeChannels) {
+TinyWeb::base::Timestamp EPollPoller::poll(int timeoutMs,
+                                           ChannelList *activeChannels) {
+  // log
   int numEvent = ::epoll_wait(epollfd_, events_.data(),
-                              static_cast<int>(events_.size()), -1);
+                              static_cast<int>(events_.size()), timeoutMs);
+  int saveErrno = errno;
+  TinyWeb::base::Timestamp now(TinyWeb::base::Timestamp::now());
+
   if (numEvent > 0) {
+    // log
     fillActiveChannels(numEvent, activeChannels);
     if (static_cast<size_t>(numEvent) == events_.size()) {
       events_.resize(events_.size() * 2);
@@ -34,12 +40,17 @@ void EPollPoller::poll(ChannelList *activeChannels) {
   } else if (numEvent == 0) {
     // TODO: log
   } else {
-    // TODO: log
+    if (saveErrno != EINTR) {
+      errno = saveErrno;
+      // log
+    }
   }
+  return now;
 }
 
 void EPollPoller::updateChannel(Channel *channel) {
   const int index = channel->index();
+  // log
   if (index == kNew || index == kDeleted) {
     if (index == kNew) {
       int fd = channel->fd();
@@ -59,6 +70,7 @@ void EPollPoller::updateChannel(Channel *channel) {
 }
 
 void EPollPoller::removeChannel(Channel *channel) {
+  // log
   int fd = channel->fd();
   channels_.erase(fd);
 
@@ -71,6 +83,7 @@ void EPollPoller::removeChannel(Channel *channel) {
 
 void EPollPoller::fillActiveChannels(int numEvents,
                                      ChannelList *activeChannels) const {
+  // log
   for (int i = 0; i < numEvents; i++) {
     Channel *channel = static_cast<Channel *>(events_[i].data.ptr);
     channel->set_revents(events_[i].events);

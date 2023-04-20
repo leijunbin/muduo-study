@@ -6,6 +6,8 @@
 #include <functional>
 #include <memory>
 
+#include "../../base/include/Timestamp.h"
+
 namespace TinyWeb {
 namespace net {
 class EventLoop;
@@ -13,13 +15,13 @@ class EventLoop;
 class Channel {
  public:
   using EventCallback = std::function<void()>;
-  // using ReadEventCallback =
+  using ReadEventCallback = std::function<void(base::Timestamp)>;
 
   Channel(EventLoop *loop, int fd);
 
-  void handleEvent();
+  void handleEvent(base::Timestamp receiveTime);
 
-  void setReadCallback(EventCallback cb) { readCallback_ = cb; }
+  void setReadCallback(ReadEventCallback cb) { readCallback_ = cb; }
   void setWriteCallback(EventCallback cb) { writeCallback_ = cb; }
   void setCloseCallback(EventCallback cb) { closeCallback_ = cb; }
   void setErrorCallback(EventCallback cb) { errorCallback_ = cb; }
@@ -66,7 +68,7 @@ class Channel {
 
  private:
   void update();
-  void handleEventWithGuard();
+  void handleEventWithGuard(base::Timestamp receiveTime);
 
   static const int kNoneEvent = 0;
   static const int kReadEvent = EPOLLIN | EPOLLPRI;
@@ -81,7 +83,7 @@ class Channel {
   std::weak_ptr<void> tie_;
   bool tied_;
 
-  EventCallback readCallback_;
+  ReadEventCallback readCallback_;
   EventCallback writeCallback_;
   EventCallback closeCallback_;
   EventCallback errorCallback_;

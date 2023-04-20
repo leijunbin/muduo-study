@@ -16,7 +16,7 @@ class EPollPoller : public Poller {
   EPollPoller(EventLoop *);
   ~EPollPoller();
 
-  void poll(ChannelList *activeChannels) override;
+  base::Timestamp poll(int timeoutMs, ChannelList *activeChannels) override;
   void updateChannel(Channel *channel) override;
   void removeChannel(Channel *channel) override;
 

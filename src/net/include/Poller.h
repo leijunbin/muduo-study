@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../../base/include/Timestamp.h"
+
 namespace TinyWeb {
 namespace net {
 class Channel;
@@ -16,7 +18,7 @@ class Poller {
   Poller(EventLoop *);
   virtual ~Poller();
 
-  virtual void poll(ChannelList *activeChannels) = 0;
+  virtual base::Timestamp poll(int timeoutMs, ChannelList *activeChannels) = 0;
   virtual void updateChannel(Channel *channel) = 0;
   virtual void removeChannel(Channel *channel) = 0;
 
