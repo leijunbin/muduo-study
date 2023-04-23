@@ -2,13 +2,18 @@
 
 #include <unistd.h>
 
+#include "../base/include/Logging.h"
 #include "include/Channel.h"
 #include "include/EventLoop.h"
 #include "include/Socket.h"
 
+using namespace TinyWeb::net;
+using namespace TinyWeb::base;
+
 static EventLoop *CheckLoopNotNull(EventLoop *loop) {
   if (loop == nullptr) {
-    // log
+    LOG_FATAL << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__
+              << " TcpConnection Loop is null";
   }
   return loop;
 }
@@ -31,12 +36,13 @@ TcpConnection::TcpConnection(EventLoop *loop, const std::string &nameArg,
   channel_->setCloseCallback(std::bind(&TcpConnection::handleClose, this));
   channel_->setErrorCallback(std::bind(&TcpConnection::handleError, this));
 
-  // log
+  LOG_TRACE << "TcpConnection::ctor[" << name_ << "] at fd=" << sockfd;
   socket_->setKeepAlive(true);
 }
 
 TcpConnection::~TcpConnection() {
-  // log
+  LOG_TRACE << "TcpConnection::ctor[" << name_ << "] at fd=" << channel_->fd()
+            << " state=" << static_cast<int>(state_);
 }
 
 void TcpConnection::send(const std::string &buf) {
@@ -56,7 +62,7 @@ void TcpConnection::sendInLoop(const void *data, size_t len) {
   bool faultError = false;
 
   if (state_ == kDisconnected) {
-    // log
+    LOG_ERROR << "disconnected, give up writing";
   }
 
   if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0) {
@@ -70,7 +76,7 @@ void TcpConnection::sendInLoop(const void *data, size_t len) {
     } else {
       nwrote = 0;
       if (errno != EWOULDBLOCK) {
-        // log
+        LOG_ERROR << "TcpConnection::sendInLoop";
         if (errno == EPIPE || errno == ECONNRESET) {
           faultError = true;
         }
@@ -131,7 +137,7 @@ void TcpConnection::handleRead(base::Timestamp receiveTime) {
     handleClose();
   } else {
     errno = savedErrno;
-    // log
+    LOG_ERROR << "TcpConnection::handleRead";
     handleError();
   }
 }
@@ -153,15 +159,17 @@ void TcpConnection::handleWrite() {
         }
       }
     } else {
-      // log
+      LOG_ERROR << "TcpConnection::handleWrite with errno:" << savedErrno;
     }
   } else {
-    // log
+    LOG_ERROR << "TcpConnection fd =" << channel_->fd()
+              << " id down,no more writing";
   }
 }
 
 void TcpConnection::handleClose() {
-  // log
+  LOG_TRACE << "TcpConnection::handleClose fd=" << channel_->fd()
+            << " state=" << static_cast<int>(state_.load());
   setState(kDisconnected);
   channel_->disableAll();
 
@@ -180,5 +188,6 @@ void TcpConnection::handleError() {
   } else {
     err = optval;
   }
-  // log
+  LOG_ERROR << "TcpConnection::handleErrno name:" << name_
+            << " - SO_ERROR:" << err;
 }

@@ -6,9 +6,11 @@
 
 #include <cstring>
 
+#include "../base/include/Logging.h"
 #include "include/InetAddress.h"
 
 using namespace TinyWeb::net;
+using namespace TinyWeb::base;
 
 int Socket::createNoneblockingFD() {
   // 创建网络套接字，返回文件描述符
@@ -19,7 +21,8 @@ int Socket::createNoneblockingFD() {
   int sockfd = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC,
                         IPPROTO_TCP);
   if (sockfd < 0) {
-    // log
+    LOG_FATAL << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__
+              << " listen socket create err:" << errno;
   }
   return sockfd;
 }
@@ -50,7 +53,7 @@ void Socket::bindAddress(const InetAddress &localaddr) {
   // 3:地址结构大小
   if (0 != ::bind(sockfd_, (sockaddr *)localaddr.getSockAddr(),
                   sizeof(sockaddr_in))) {
-    // TODO: log
+    LOG_FATAL << "bind sockfd:" << sockfd_ << " fail";
   }
 }
 
@@ -59,7 +62,7 @@ void Socket::listen() {
   // 1:socket实例
   // 2:listen函数最大监听队列长度，SOMAXCONN系统建议最大值
   if (0 != ::listen(sockfd_, 1024)) {
-    // TODO: log
+    LOG_FATAL << "listen sockfd:" << sockfd_ << " fail";
   }
 }
 
@@ -74,7 +77,8 @@ int Socket::accept(InetAddress *peeraddr) {
   // 3:接受连接套接字IP信息结构体大小指针
   int connfd =
       ::accept4(sockfd_, (sockaddr *)&addr, &len, SOCK_NONBLOCK | SOCK_CLOEXEC);
-  // TODO: log
+  LOG_TRACE << "Socket::accept sockaddr port:"
+            << static_cast<int>(ntohs(addr.sin_port));
   if (connfd >= 0) {
     peeraddr->setSockaddr(addr);
   }
@@ -83,7 +87,7 @@ int Socket::accept(InetAddress *peeraddr) {
 
 void Socket::shutdownWrite() {
   if (::shutdown(sockfd_, SHUT_WR) < 0) {
-    // log
+    LOG_INFO << "Socket::shutdownWrite error";
   }
 }
 

@@ -10,9 +10,9 @@ std::atomic_int Thread::numCreated_(0);
 
 Thread::Thread(ThreadFunc func, const std::string &name)
     : id_(0), func_(std::move(func)), name_(name) {
-  if (name_ == "") {
-    name_ = std::string("Thread") +
-            std::to_string(static_cast<int>(numCreated_.load()));
+  if (name_.empty()) {
+    name_ =
+        std::string("Thread") + std::to_string(static_cast<int>(numCreated_++));
   }
 }
 

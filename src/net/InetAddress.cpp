@@ -2,13 +2,16 @@
 
 #include <cstring>
 
+#include "../base/include/Logging.h"
+
 using namespace TinyWeb::net;
+using namespace TinyWeb::base;
 
 sockaddr_in InetAddress::getLocalAddr(int sockfd) {
   sockaddr_in localaddr{0};
   socklen_t addrlen = sizeof(localaddr);
   if (::getsockname(sockfd, (sockaddr*)&localaddr, &addrlen)) {
-    // log
+    LOG_ERROR << "Socket::getLocalAddr";
   }
   return localaddr;
 }
@@ -17,7 +20,7 @@ sockaddr_in InetAddress::getPeerAddr(int sockfd) {
   sockaddr_in peeraddr{0};
   socklen_t addrlen = sizeof(peeraddr);
   if (::getpeername(sockfd, (sockaddr*)&peeraddr, &addrlen)) {
-    // log
+    LOG_ERROR << "Socket::getLocalAddr";
   }
   return peeraddr;
 }

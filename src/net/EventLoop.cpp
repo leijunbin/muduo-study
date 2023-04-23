@@ -5,6 +5,7 @@
 
 #include <cstring>
 
+#include "../base/include/Logging.h"
 #include "include/Channel.h"
 #include "include/Poller.h"
 #include "include/TimerQueue.h"
@@ -19,7 +20,7 @@ const int kPollTimeMs = 10000;
 static int createEvent() {
   int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
   if (evtfd < 0) {
-    // log
+    LOG_FATAL << "eventfd error:" << errno;
   }
   return evtfd;
 }
@@ -40,14 +41,14 @@ EventLoop::EventLoop()
       wakeupChannel_(new Channel(this, wakeupFd_)),
       timerQueue_(new TimerQueue(this)) {
   if (t_loopInThisThread) {
-    // log
+    LOG_FATAL << "Another EventLoop exists in this thread " << get_thread_id();
   } else {
     t_loopInThisThread = this;
   }
 
   wakeupChannel_->setReadCallback(std::bind(&EventLoop::handleRead, this));
   wakeupChannel_->enableReading();
-  // log
+  LOG_TRACE << "EventLoop ctor end";
 }
 
 EventLoop::~EventLoop() {
@@ -61,7 +62,7 @@ void EventLoop::handleRead() {
   uint64_t one = 1;
   ssize_t n = read(wakeupFd_, &one, sizeof(one));
   if (n != sizeof(one)) {
-    // log
+    LOG_ERROR << "EventLoop::handleRead() reads " << n << " bytes instead of 8";
   }
 }
 
@@ -74,6 +75,7 @@ void EventLoop::loop() {
     pollReturnTime_ = poller_->poll(kPollTimeMs, &activeChannels_);
 
     for (Channel *channel : activeChannels_) {
+      LOG_TRACE << "EventLoop::loop get in channelHandle fd=" << channel->fd();
       channel->handleEvent(pollReturnTime_);
     }
 
@@ -92,8 +94,8 @@ void EventLoop::quit() {
 }
 
 void EventLoop::runInLoop(Functor cb) {
-  // int inThread = isInLoopThread();
-  // log
+  int inThread = isInLoopThread();
+  LOG_TRACE << "EventLoop::runInLoop in loopThread:" << inThread;
   if (isInLoopThread()) {
     cb();
   } else {
@@ -132,7 +134,7 @@ void EventLoop::wakeup() {
   uint64_t one = 1;
   ssize_t n = write(wakeupFd_, &one, sizeof(one));
   if (n != sizeof(one)) {
-    // log
+    LOG_ERROR << "EventLoop::wakeup() writes " << n << " bytes instand of 8";
   }
 }
 
@@ -149,7 +151,7 @@ bool EventLoop::hasChannel(Channel *channel) {
 }
 
 void EventLoop::doPendingFunctors() {
-  // log
+  LOG_TRACE << "EventLoop::doPendingFunctors callback";
 
   std::vector<Functor> functors;
   callingPendingFunctors_.store(true);
@@ -163,4 +165,13 @@ void EventLoop::doPendingFunctors() {
     functor();
   }
   callingPendingFunctors_.store(false);
+}
+
+void EventLoop::abortNotInLoopThread() {
+  unsigned long id;
+  std::thread::id curId = std::this_thread::get_id();
+  memcpy(&id, &curId, 8);
+  LOG_FATAL << "EventLoop::abortNotInLoopThread - EventLoop " << this
+            << " was created in threadId_ = " << get_thread_id()
+            << ", current thread id = " << id;
 }

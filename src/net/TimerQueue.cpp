@@ -6,6 +6,7 @@
 
 #include <cstring>
 
+#include "../base/include/Logging.h"
 #include "include/EventLoop.h"
 #include "include/Timer.h"
 #include "include/TimerId.h"
@@ -16,7 +17,7 @@ using namespace TinyWeb::base;
 int createTimerfd() {
   int timerfd = ::timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
   if (timerfd < 0) {
-    // log
+    LOG_ERROR << "Failed in timerfd_create";
   }
   return timerfd;
 }
@@ -38,9 +39,11 @@ struct timespec howMuchTimeFromNow(Timestamp when) {
 void readTimerfd(int timerfd, Timestamp now) {
   uint64_t howmany;
   ssize_t n = ::read(timerfd, &howmany, sizeof(howmany));
-  // log
+  LOG_TRACE << "TimerQueue::handleRead() " << howmany << " at "
+            << now.toString();
   if (n != sizeof(howmany)) {
-    // log
+    LOG_ERROR << "TimerQueue::handleRead() reads " << n
+              << " bytes instead of 8";
   }
 }
 
@@ -52,7 +55,7 @@ void resetTimerfd(int timerfd, Timestamp expiration) {
   newValue.it_value = howMuchTimeFromNow(expiration);
   int ret = ::timerfd_settime(timerfd, 0, &newValue, &oldValue);
   if (ret) {
-    // log
+    LOG_ERROR << "timerfd_settime()";
   }
 }
 
@@ -87,9 +90,7 @@ void TimerQueue::cancel(TimerId timerId) {
 }
 
 void TimerQueue::addTimerInLoop(Timer* timer) {
-  if (!loop_->isInLoopThread()) {
-    // log
-  }
+  loop_->assertInLoopThread();
   bool earliestChanged = insert(timer);
 
   if (earliestChanged) {
@@ -98,9 +99,7 @@ void TimerQueue::addTimerInLoop(Timer* timer) {
 }
 
 void TimerQueue::cancelInLoop(TimerId timerId) {
-  if (!loop_->isInLoopThread()) {
-    // log
-  }
+  loop_->assertInLoopThread();
   assert(timers_.size() == activeTimers_.size());
   ActiveTimer timer(timerId.timer_, timerId.sequence_);
   ActiveTimerSet::iterator it = activeTimers_.find(timer);
@@ -116,9 +115,7 @@ void TimerQueue::cancelInLoop(TimerId timerId) {
 }
 
 void TimerQueue::handleRead() {
-  if (!loop_->isInLoopThread()) {
-    // log
-  }
+  loop_->assertInLoopThread();
   Timestamp now(Timestamp::now());
   readTimerfd(timerfd_, now);
 
@@ -175,9 +172,7 @@ void TimerQueue::reset(const std::vector<Entry>& expired, Timestamp now) {
 }
 
 bool TimerQueue::insert(Timer* timer) {
-  if (!loop_->isInLoopThread()) {
-    // log
-  }
+  loop_->assertInLoopThread();
   assert(timers_.size() == activeTimers_.size());
   bool earliestChanged = false;
   Timestamp when = timer->expiration();

@@ -1,12 +1,14 @@
 #include <functional>
 
-#include "../src/base/include/Timestamp.h"
-#include "../src/net/include/Buffer.h"
-#include "../src/net/include/Callbacks.h"
-#include "../src/net/include/EventLoop.h"
-#include "../src/net/include/TcpConnection.h"
-#include "../src/net/include/TcpServer.h"
+#include "../../src/base/include/Logging.h"
+#include "../../src/base/include/Timestamp.h"
+#include "../../src/net/include/Buffer.h"
+#include "../../src/net/include/Callbacks.h"
+#include "../../src/net/include/EventLoop.h"
+#include "../../src/net/include/TcpConnection.h"
+#include "../../src/net/include/TcpServer.h"
 using namespace TinyWeb::net;
+using namespace TinyWeb::base;
 
 class EchoServer {
  public:
@@ -28,16 +30,19 @@ class EchoServer {
  private:
   void onConnection(const TcpConnectionPtr &conn) {
     if (conn->connected()) {
-      // LOG_INFO("Connection UP : %s", conn->peerAddress().toIpPort().c_str());
+      LOG_INFO << "Connection UP : " << conn->peerAddress().toIpPort().c_str();
     } else {
-      // LOG_INFO("Connection DOWN : %s",
-      // conn->peerAddress().toIpPort().c_str());
+      LOG_INFO << "Connection DOWN : "
+               << conn->peerAddress().toIpPort().c_str();
     }
   }
 
   void onMessage(const TcpConnectionPtr &conn, Buffer *buf,
                  TinyWeb::base::Timestamp time) {
     std::string msg = buf->retrieveAsString(buf->readableBytes());
+    LOG_INFO << conn->name().c_str() << " echo " << static_cast<int>(msg.size())
+             << " bytes,content:" << msg.c_str() << ";in "
+             << time.toString().c_str();
     conn->send(msg);
   }
 
@@ -46,6 +51,7 @@ class EchoServer {
 };
 
 int main() {
+  // Logger::setLogLevel(Logger::TRACE);
   EventLoop loop;
   InetAddress addr(8086);
   EchoServer server(&loop, addr, "EchoServer");

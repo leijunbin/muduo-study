@@ -2,18 +2,21 @@
 
 #include <unistd.h>
 
+#include "../base/include/Logging.h"
 #include "include/Channel.h"
 #include "include/EventLoop.h"
 #include "include/InetAddress.h"
 #include "include/Socket.h"
 
 using namespace TinyWeb::net;
+using namespace TinyWeb::base;
 
 static int createNoneblocking() {
   int sockfd = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC,
                         IPPROTO_TCP);
   if (sockfd < 0) {
-    // log
+    LOG_FATAL << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__
+              << " listen socket create err:" << errno;
   }
   return sockfd;
 }
@@ -42,7 +45,8 @@ Acceptor::~Acceptor() {
 void Acceptor::handleRead() {
   InetAddress peeraddr;
   int connfd = acceptSock_->accept(&peeraddr);
-  // log
+  LOG_DEBUG << "Acceptor::handleRead and peerAddr:"
+            << peeraddr.toIpPort().c_str() << " and connfd=" << connfd;
   if (connfd >= 0) {
     if (newConnectionCallback_) {
       newConnectionCallback_(connfd, peeraddr);
@@ -50,15 +54,17 @@ void Acceptor::handleRead() {
       ::close(connfd);
     }
   } else {
-    // log
+    LOG_ERROR << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__
+              << " accept err:" << errno;
     if (errno == EMFILE) {
-      // log
+      LOG_ERROR << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__
+                << "  sockfd reached limit";
     }
   }
 }
 
 void Acceptor::listen() {
-  // log
+  LOG_DEBUG << "Acceptor::listen begin to listen";
   listenning_ = true;
   acceptSock_->listen();
   acceptChannel_->enableReading();

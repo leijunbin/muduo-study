@@ -6,8 +6,6 @@
 
 #include "../../base/include/Timestamp.h"
 
-using namespace TinyWeb::net;
-
 namespace TinyWeb {
 namespace net {
 class Buffer;

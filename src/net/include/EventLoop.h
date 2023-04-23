@@ -45,11 +45,17 @@ class EventLoop {
   void removeChannel(Channel *channel);
   bool hasChannel(Channel *channel);
 
+  void assertInLoopThread() {
+    if (!isInLoopThread()) {
+      abortNotInLoopThread();
+    }
+  }
   bool isInLoopThread() { return threadId_ == std::this_thread::get_id(); }
 
   unsigned long get_thread_id();
 
  private:
+  void abortNotInLoopThread();
   void handleRead();
   void doPendingFunctors();
 

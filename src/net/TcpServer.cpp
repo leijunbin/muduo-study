@@ -1,11 +1,16 @@
 #include "include/TcpServer.h"
 
+#include "../base/include/Logging.h"
 #include "include/EventLoop.h"
 #include "include/TcpConnection.h"
 
+using namespace TinyWeb::net;
+using namespace TinyWeb::base;
+
 static EventLoop *CheckLoopNotNull(EventLoop *loop) {
   if (loop == nullptr) {
-    // log
+    LOG_FATAL << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__
+              << "  mainLoop is null";
   }
   return loop;
 }
@@ -53,13 +58,14 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
   ++nextConnId_;
   std::string connName = name_ + buf;
 
-  // log
+  LOG_TRACE << "TcpServer::newConnection [" << name_ << "] - new connection ["
+            << connName << "] from " << peerAddr.toIpPort();
 
   sockaddr_in local;
   ::memset(&local, 0, sizeof(local));
   socklen_t addrlen = sizeof(local);
   if (::getsockname(sockfd, (sockaddr *)&local, &addrlen) < 0) {
-    // log
+    LOG_ERROR << "sockets::getLoaclAddr";
   }
 
   InetAddress localAddr(local);
@@ -81,7 +87,8 @@ void TcpServer::removeConnection(const TcpConnectionPtr &conn) {
 }
 
 void TcpServer::removeConnectionInLoop(const TcpConnectionPtr &conn) {
-  // log
+  LOG_TRACE << "TcpServer::removeConnectionInLoop [" << name_
+            << "] - connection " << conn->name();
   connections_.erase(conn->name());
   EventLoop *ioLoop = conn->getLoop();
   ioLoop->queueInLoop(std::bind(&TcpConnection::connectDestroyed, conn));
