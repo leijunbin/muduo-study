@@ -29,6 +29,7 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
   bool connected() const { return state_.load() == kConnected; }
 
   void send(const std::string &buf);
+  void send(const void *data, size_t len);
 
   void shutdown();
 

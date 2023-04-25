@@ -56,6 +56,16 @@ void TcpConnection::send(const std::string &buf) {
   }
 }
 
+void TcpConnection::send(const void *data, size_t len) {
+  if (state_ == kConnected) {
+    if (loop_->isInLoopThread()) {
+      sendInLoop(data, len);
+    } else {
+      loop_->runInLoop(std::bind(&TcpConnection::sendInLoop, this, data, len));
+    }
+  }
+}
+
 void TcpConnection::sendInLoop(const void *data, size_t len) {
   ssize_t nwrote = 0;
   size_t remaining = len;
@@ -63,6 +73,7 @@ void TcpConnection::sendInLoop(const void *data, size_t len) {
 
   if (state_ == kDisconnected) {
     LOG_ERROR << "disconnected, give up writing";
+    return;
   }
 
   if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0) {

@@ -1,1 +1,3 @@
-add_subdirectory(./echoServer)
+add_subdirectory(./echo)
+
+add_subdirectory(./http)

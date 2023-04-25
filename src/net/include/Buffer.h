@@ -14,6 +14,7 @@ class Buffer {
  public:
   static const size_t kCheapPrepend = 8;
   static const size_t kInitialSize = 1024;
+  static const char kCRLF[];
 
   explicit Buffer(size_t initialSize = kInitialSize)
       : buffer_(kCheapPrepend + initialSize),
@@ -33,6 +34,7 @@ class Buffer {
   char *beginWrite() { return begin() + writerIndex_; }
   const char *beginWrite() const { return begin() + writerIndex_; }
 
+  void retrieveUntil(const char *end) { retrieve(end - peek()); }
   void retrieve(size_t len) {
     if (len < readableBytes()) {
       readerIndex_ += len;
@@ -60,6 +62,11 @@ class Buffer {
   }
   void append(const char *str) { append(str, strlen(str)); }
   void append(const std::string &str) { append(str.c_str(), str.size()); }
+
+  const char *findCRLF() const {
+    const char *crlf = std::search(peek(), beginWrite(), kCRLF, kCRLF + 2);
+    return crlf == beginWrite() ? NULL : crlf;
+  }
 
   ssize_t readFd(int fd, int *saveErrno);
   ssize_t writeFd(int fd, int *saveErrno);

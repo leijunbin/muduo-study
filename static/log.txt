@@ -1,0 +1,25 @@
+2023/04/24 23:41:31.531766 DEBUG test_Logging debug - AsyncLoggingTest.cpp:13
+2023/04/24 23:41:31.531781 INFO  info - AsyncLoggingTest.cpp:14
+2023/04/24 23:41:31.531784 WARN  warn - AsyncLoggingTest.cpp:15
+2023/04/24 23:41:31.531787 ERROR error - AsyncLoggingTest.cpp:16
+2023/04/24 23:41:31.531789 INFO  Hello, 0abc...xyz - AsyncLoggingTest.cpp:20
+2023/04/24 23:41:31.531792 INFO  Hello, 1abc...xyz - AsyncLoggingTest.cpp:20
+2023/04/24 23:41:31.531794 INFO  Hello, 2abc...xyz - AsyncLoggingTest.cpp:20
+2023/04/24 23:41:31.531796 INFO  Hello, 3abc...xyz - AsyncLoggingTest.cpp:20
+2023/04/24 23:41:31.531798 INFO  Hello, 4abc...xyz - AsyncLoggingTest.cpp:20
+2023/04/24 23:41:31.531801 INFO  Hello, 5abc...xyz - AsyncLoggingTest.cpp:20
+2023/04/24 23:41:31.531803 INFO  Hello, 6abc...xyz - AsyncLoggingTest.cpp:20
+2023/04/24 23:41:31.531805 INFO  Hello, 7abc...xyz - AsyncLoggingTest.cpp:20
+2023/04/24 23:41:31.531807 INFO  Hello, 8abc...xyz - AsyncLoggingTest.cpp:20
+2023/04/24 23:41:31.531810 INFO  Hello, 9abc...xyz - AsyncLoggingTest.cpp:20
+2023/04/24 23:41:31.531812 INFO  Hello, 0 abc...xyz - AsyncLoggingTest.cpp:27
+2023/04/24 23:41:31.531814 INFO  Hello, 1 abc...xyz - AsyncLoggingTest.cpp:27
+2023/04/24 23:41:31.531816 INFO  Hello, 2 abc...xyz - AsyncLoggingTest.cpp:27
+2023/04/24 23:41:31.531819 INFO  Hello, 3 abc...xyz - AsyncLoggingTest.cpp:27
+2023/04/24 23:41:31.531821 INFO  Hello, 4 abc...xyz - AsyncLoggingTest.cpp:27
+2023/04/24 23:41:31.531823 INFO  Hello, 5 abc...xyz - AsyncLoggingTest.cpp:27
+2023/04/24 23:41:31.531825 INFO  Hello, 6 abc...xyz - AsyncLoggingTest.cpp:27
+2023/04/24 23:41:31.531828 INFO  Hello, 7 abc...xyz - AsyncLoggingTest.cpp:27
+2023/04/24 23:41:31.531830 INFO  Hello, 8 abc...xyz - AsyncLoggingTest.cpp:27
+2023/04/24 23:41:31.531832 INFO  Hello, 9 abc...xyz - AsyncLoggingTest.cpp:27
+2023/04/24 23:41:31.531834 INFO  Hello, 10 abc...xyz - AsyncLoggingTest.cpp:27

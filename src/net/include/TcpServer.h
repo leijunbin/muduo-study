@@ -40,6 +40,12 @@ class TcpServer {
 
   void start();
 
+  EventLoop *getLoop() const { return loop_; }
+
+  const std::string &name() const { return name_; }
+
+  const std::string &ipPort() const { return ipPort_; }
+
  private:
   void newConnection(int sockfd, const InetAddress &peerAddr);
   void removeConnection(const TcpConnectionPtr &conn);
