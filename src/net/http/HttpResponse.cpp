@@ -29,12 +29,11 @@ const std::unordered_map<std::string, std::string> HttpResponse::SUFFIX_TYPE = {
     {".mp4", "video/mp4"}};
 
 const std::unordered_map<HttpResponse::HttpStatusCode, std::string>
-    HttpResponse::CODE_STATUS = {
-        {HttpResponse::k200Ok, "OK"},
-        {HttpResponse::k400BadRequest, "Bad Request"},
-        {HttpResponse::k301MovedPermanently, "Moved Permanently"},
-        {HttpResponse::k404NotFound, "Not Found"},
-        {HttpResponse::kUnKonwn, "Undefined Error"}};
+    HttpResponse::CODE_STATUS = {{HttpResponse::k200Ok, "OK"},
+                                 {HttpResponse::k400BadRequest, "Bad Request"},
+                                 {HttpResponse::k302Found, "Found"},
+                                 {HttpResponse::k404NotFound, "Not Found"},
+                                 {HttpResponse::kUnKonwn, "Undefined Error"}};
 
 const std::unordered_map<HttpResponse::HttpStatusCode, std::string>
     HttpResponse::CODE_PATH = {

@@ -83,6 +83,10 @@ bool HttpContext::parseRequest(Buffer* buf, Timestamp receiveTime) {
     } else if (state_ == kExpectBody) {
       LOG_DEBUG << "HttpContext Body";
       request_.setBody(buf->retrieveAsString(buf->readableBytes()));
+      if (request_.headers().find("Content-Type")->second ==
+          "application/x-www-form-urlencoded") {
+        request_.parseFromUrlencoded_();
+      }
       state_ = kGotAll;
       hasMore = false;
     }

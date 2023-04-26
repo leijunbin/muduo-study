@@ -9,10 +9,6 @@ using namespace TinyWeb::net::http;
 namespace detail {
 void defaultHttpCallback(const HttpRequest &, HttpResponse *resp) {
   resp->setStatusCode(HttpResponse::k404NotFound);
-  resp->setContentType("text/html");
-  resp->setStringBody(
-      "<html><head><title>This is title</title></head>"
-      "<body><h1>404 Not Found</h1></html>");
   resp->setCloseConnection(true);
 }
 }  // namespace detail
@@ -43,7 +39,10 @@ void HttpServer::onMessage(const TcpConnectionPtr &conn, Buffer *buf,
 
   if (!context->parseRequest(buf, receiveTime)) {
     LOG_INFO << "parseRequest failed!";
-    conn->send("HTTP/1.1 400 Bad Request\r\n\r\n");
+    HttpResponse response(true);
+    response.setStatusCode(HttpResponse::k400BadRequest);
+    sendFile(HttpResponse::CODE_PATH.find(HttpResponse::k400BadRequest)->second,
+             conn, &response, Static);
     conn->shutdown();
   }
 
@@ -66,12 +65,14 @@ void HttpServer::onRequest(const TcpConnectionPtr &conn,
 
   if (req.method() == HttpRequest::kGet &&
       staticFiles_.find(path) != staticFiles_.end()) {
+    response.setStatusCode(HttpResponse::k200Ok);
     sendFile(staticFiles_[path], conn, &response, FileType::Static);
     return;
   }
 
   if (req.method() == HttpRequest::kGet &&
       downloadFiles_.find(path) != downloadFiles_.end()) {
+    response.setStatusCode(HttpResponse::k200Ok);
     sendFile(downloadFiles_[path], conn, &response, FileType::Download);
     return;
   }
@@ -95,11 +96,17 @@ void HttpServer::onRequest(const TcpConnectionPtr &conn,
   }
   httpCallback(req, &response);
 
-  Buffer buf;
-  response.appendStringToBuffer(&buf);
-  sendWithBuffer(conn, &buf);
-  if (response.closeConnection()) {
-    conn->shutdown();
+  if (response.statusCode() == HttpResponse::k200Ok ||
+      response.statusCode() == HttpResponse::k302Found) {
+    Buffer buf;
+    response.appendStringToBuffer(&buf);
+    sendWithBuffer(conn, &buf);
+    if (response.closeConnection()) {
+      conn->shutdown();
+    }
+  } else if (response.statusCode() == HttpResponse::k404NotFound) {
+    sendFile(HttpResponse::CODE_PATH.find(HttpResponse::k404NotFound)->second,
+             conn, &response, Static);
   }
 }
 
@@ -122,8 +129,6 @@ void HttpServer::DownloadFile(const std::string &path, std::string filename) {
 bool HttpServer::sendFile(const std::string &filename,
                           const TcpConnectionPtr &conn, HttpResponse *resp,
                           FileType fileType) {
-  resp->setStatusCode(HttpResponse::k200Ok);
-
   std::string::size_type idx = filename.find_last_of('.');
   if (idx == std::string::npos) {
     resp->setContentType("text/plain");

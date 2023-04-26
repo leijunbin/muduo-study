@@ -15,7 +15,7 @@ class HttpResponse {
   enum HttpStatusCode {
     kUnKonwn,
     k200Ok = 200,
-    k301MovedPermanently = 301,
+    k302Found = 302,
     k400BadRequest = 400,
     k404NotFound = 404,
   };
@@ -48,6 +48,8 @@ class HttpResponse {
 
   void appendStringToBuffer(Buffer* output) const;
   void appendFileToBuffer(Buffer* output, off_t size) const;
+
+  const HttpStatusCode statusCode() const { return statusCode_; }
 
  private:
   void appendRequestLintToBuffer(Buffer* output) const;

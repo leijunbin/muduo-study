@@ -46,6 +46,21 @@ int main() {
                         ", body size: " + std::to_string(req.body().size()));
   });
 
+  server.Post("/login", [](const HttpRequest& req, HttpResponse* resp) {
+    resp->setStatusCode(HttpResponse::k302Found);
+    if (req.post().find("username")->second == "123456" &&
+        req.post().find("password")->second == "123456") {
+      resp->addHeader("Location", "/welcome");
+    } else {
+      resp->addHeader("Location", "/error");
+    }
+  });
+
+  server.Post("/register", [](const HttpRequest& req, HttpResponse* resp) {
+    resp->setStatusCode(HttpResponse::k302Found);
+    resp->addHeader("Location", "/welcome");
+  });
+
   server.StaticFile("/file", "test.jpg");
 
   // html web index
@@ -90,6 +105,8 @@ int main() {
 
   // html web login
   server.StaticFile("/login", "login.html");
+  server.StaticFile("/welcome", "welcome.html");
+  server.StaticFile("/error", "error.html");
 
   server.setThreadNum(4);
   server.start();
