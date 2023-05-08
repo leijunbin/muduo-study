@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "../../base/include/noncopyable.h"
 #include "Acceptor.h"
 #include "Callbacks.h"
 #include "EventLoopThreadPool.h"
@@ -15,7 +16,7 @@ namespace TinyWeb {
 namespace net {
 class EventLoop;
 
-class TcpServer {
+class TcpServer : base::noncopyable {
  public:
   using ThreadInitCallback = std::function<void(EventLoop *)>;
 

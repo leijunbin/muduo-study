@@ -8,9 +8,11 @@
 #include <string>
 #include <vector>
 
+#include "../../base/include/noncopyable.h"
+
 namespace TinyWeb {
 namespace net {
-class Buffer {
+class Buffer : base::noncopyable {
  public:
   static const size_t kCheapPrepend = 8;
   static const size_t kInitialSize = 1024;

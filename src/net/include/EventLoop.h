@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "../../base/include/Timestamp.h"
+#include "../../base/include/noncopyable.h"
 #include "Callbacks.h"
 #include "TimerId.h"
 
@@ -19,7 +20,7 @@ class Poller;
 class Channel;
 class TimerQueue;
 
-class EventLoop {
+class EventLoop : base::noncopyable {
  public:
   using Functor = std::function<void()>;
 

@@ -9,10 +9,11 @@
 
 #include "FixedBuffer.h"
 #include "Thread.h"
+#include "noncopyable.h"
 
 namespace TinyWeb {
 namespace base {
-class AsyncLogging {
+class AsyncLogging : noncopyable {
  public:
   AsyncLogging(const std::string& basename, off_t rollSize,
                int flushInterval = 3);

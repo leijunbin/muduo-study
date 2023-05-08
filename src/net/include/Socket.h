@@ -1,11 +1,13 @@
 #ifndef SRC_NET_INCLUDE_SOCKET_H_
 #define SRC_NET_INCLUDE_SOCKET_H_
 
+#include "../../base/include/noncopyable.h"
+
 namespace TinyWeb {
 namespace net {
 class InetAddress;
 
-class Socket {
+class Socket : base::noncopyable {
  public:
   explicit Socket(int sockfd) : sockfd_(sockfd) {}
   ~Socket();

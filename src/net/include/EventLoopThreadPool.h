@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "../../base/include/noncopyable.h"
 #include "EventLoopThread.h"
 
 namespace TinyWeb {
@@ -14,7 +15,7 @@ namespace net {
 class EventLoop;
 class EventLoopThread;
 
-class EventLoopThreadPool {
+class EventLoopThreadPool : base::noncopyable {
  public:
   using ThreadInitCallback = std::function<void(EventLoop *)>;
 

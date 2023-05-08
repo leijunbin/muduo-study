@@ -7,13 +7,14 @@
 #include <string>
 
 #include "../../base/include/Thread.h"
+#include "../../base/include/noncopyable.h"
 
 namespace TinyWeb {
 namespace net {
 
 class EventLoop;
 
-class EventLoopThread {
+class EventLoopThread : base::noncopyable {
  public:
   using ThreadInitCallback = std::function<void(EventLoop *)>;
 

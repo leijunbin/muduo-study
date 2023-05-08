@@ -3,13 +3,16 @@
 
 #include <functional>
 
+#include "../../base/include/noncopyable.h"
+
 namespace TinyWeb {
 namespace net {
 class EventLoop;
 class Socket;
 class InetAddress;
 class Channel;
-class Acceptor {
+
+class Acceptor : base::noncopyable {
  public:
   using NewConnectionCallback = std::function<void(int, const InetAddress &)>;
 

@@ -7,9 +7,11 @@
 #include <string>
 #include <thread>
 
+#include "noncopyable.h"
+
 namespace TinyWeb {
 namespace base {
-class Thread {
+class Thread : noncopyable {
  public:
   using ThreadFunc = std::function<void()>;
 

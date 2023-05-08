@@ -5,9 +5,11 @@
 
 #include <string>
 
+#include "noncopyable.h"
+
 namespace TinyWeb {
 namespace base {
-class FileUtil {
+class FileUtil : noncopyable {
  public:
   explicit FileUtil(std::string& fileName);
   ~FileUtil();

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "../../base/include/Timestamp.h"
+#include "../../base/include/noncopyable.h"
 #include "Callbacks.h"
 #include "Channel.h"
 
@@ -15,7 +16,7 @@ class EventLoop;
 class Timer;
 class TimerId;
 
-class TimerQueue {
+class TimerQueue : base::noncopyable {
  public:
   explicit TimerQueue(EventLoop *loop);
   ~TimerQueue();

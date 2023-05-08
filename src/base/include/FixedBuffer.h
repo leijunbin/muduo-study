@@ -4,13 +4,15 @@
 #include <cstring>
 #include <string>
 
+#include "noncopyable.h"
+
 namespace TinyWeb {
 namespace base {
 const int kSmallBuffer = 4000;
 const int kLargeBuffer = 4000 * 1000;
 
 template <int SIZE>
-class FixedBuffer {
+class FixedBuffer : noncopyable {
  public:
   FixedBuffer() : cur_(data_) {}
 

@@ -4,11 +4,12 @@
 #include <atomic>
 
 #include "../../base/include/Timestamp.h"
+#include "../../base/include/noncopyable.h"
 #include "Callbacks.h"
 
 namespace TinyWeb {
 namespace net {
-class Timer {
+class Timer : base::noncopyable {
  public:
   Timer(TimerCallback cb, base::Timestamp when, double interval)
       : timerCallback_(cb),

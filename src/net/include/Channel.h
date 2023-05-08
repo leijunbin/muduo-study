@@ -7,12 +7,13 @@
 #include <memory>
 
 #include "../../base/include/Timestamp.h"
+#include "../../base/include/noncopyable.h"
 
 namespace TinyWeb {
 namespace net {
 class EventLoop;
 
-class Channel {
+class Channel : base::noncopyable {
  public:
   using EventCallback = std::function<void()>;
   using ReadEventCallback = std::function<void(base::Timestamp)>;

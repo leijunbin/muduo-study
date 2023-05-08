@@ -2,6 +2,7 @@
 #define SRC_BASE_INCLUDE_LOGSTREAM_H_
 
 #include "FixedBuffer.h"
+#include "noncopyable.h"
 
 namespace TinyWeb {
 namespace base {
@@ -15,7 +16,7 @@ class GeneralTemplate {
   int len_;
 };
 
-class LogStream {
+class LogStream : noncopyable {
  public:
   using Buffer = FixedBuffer<kSmallBuffer>;
 

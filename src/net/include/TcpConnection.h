@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 
+#include "../../base/include/noncopyable.h"
 #include "Buffer.h"
 #include "Callbacks.h"
 #include "InetAddress.h"
@@ -15,7 +16,8 @@ class EventLoop;
 class Socket;
 class Channel;
 
-class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
+class TcpConnection : base::noncopyable,
+                      public std::enable_shared_from_this<TcpConnection> {
  public:
   TcpConnection(EventLoop *loop, const std::string &nameArg, int sockfd,
                 const InetAddress &localAddr, const InetAddress &peerAddr);

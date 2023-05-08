@@ -5,10 +5,11 @@
 #include <mutex>
 
 #include "FileUtil.h"
+#include "noncopyable.h"
 
 namespace TinyWeb {
 namespace base {
-class LogFile {
+class LogFile : noncopyable {
  public:
   LogFile(const std::string &basename, off_t rollSize, int flushInterval = 3,
           int checkEveryN = 1024);
