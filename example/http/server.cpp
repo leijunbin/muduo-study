@@ -15,7 +15,7 @@ using namespace TinyWeb::net;
 bool benchmark = false;
 
 int main() {
-  Logger::setLogLevel(Logger::DEBUG);
+  Logger::setLogLevel(Logger::INFO);
   std::string name = "HTTP server";
   InetAddress listenAddr = InetAddress(8086);
   EventLoop loop;
@@ -31,8 +31,7 @@ int main() {
     std::string now = Timestamp::now().toString();
     resp->setStringBody(R"(<html><head><title>TinyWebLib HTTP</title></head>
                         <body><h1>Hello</h1>Now is )" +
-                        now +
-                        "<h1>line</h1> <img src=./file></img>  </body></html>");
+                        now + "<h1>line</h1> </body></html>");
   });
 
   server.DownloadFile("/log", "log.txt");

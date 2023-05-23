@@ -9,7 +9,7 @@ int main() {
 
   loop.runEvery(1, [&num]() { std::cout << ++num << "s\n"; });
 
-  loop.runAfter(5, [&loop]() {
+  loop.runAfter(6, [&loop]() {
     std::cout << "timer finish\n";
     loop.quit();
   });
